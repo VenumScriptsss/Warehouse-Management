@@ -63,7 +63,11 @@ src/
 2. **Installation**:
    ```bash
    # Clone the repository
-   git clone [your-repo-url]
+   git clone [repo-url]
+   
+   # create virtual envirement
+   python -m venv venv_name
+   venv_name\Scripts\activate
    cd Warehouse\ Management/src
 
    # Install Python dependencies
@@ -72,22 +76,16 @@ src/
    # Install Node dependencies
    npm install
 
-   # Run migrations
-   python manage.py migrate
 
-   # Start development server
-   python manage.py runserver
-   ```
-
-3. **Docker Setup** (optional):
+3. **Docker Setup**:
    ```bash
    docker-compose up --build
    ```
 
 ## Configuration
 
-- **Database**: SQLite (default) or PostgreSQL
-- **Environment Variables**: Configure in `.env` file
+- **Database**: SQLite/PostgreSQL
+- **Environment Variables**: Configured in `.env` file
 - **Tailwind CSS**: Configured in `tailwind.config.js`
 - **Docker**: Containerized deployment with `docker-compose.yml`
 
@@ -96,14 +94,23 @@ src/
 - **Backend**: Django (Python)
 - **Frontend**: Tailwind CSS + Vanilla JavaScript
 - **Database**: SQLite/PostgreSQL
-- **Containerization**: Docker + Docker Compose
-- **Deployment**: AWS EC2 ready architecture with Nginx reverse proxy support
+- **Containerization**: Docker 
+- **Deployment**: [PENDING] AWS EC2 ready architecture with Nginx reverse proxy support
 
-## Usage
+## Overview of how to access the app:
 
-1. Access the application at `http://localhost:8000`
-2. Login with admin credentials (create superuser with `python manage.py createsuperuser`)
-3. Navigate through the dashboard to manage inventory, warehouses, and users
+**Authentification**
+
+The application doesn't support direct sign-in for new users (even admins), to enforce security and controle. Instead sign-ins are treated as registration request.
+To login with Creds from Sign-in, the user request must be accepted by an Admin. Once accpeted, then the credentials can be used to login.
+
+How to login when first running the app (No Admins registered):
+ 1) Enter Sign In information
+ 2) Create Superuser:
+    * docker-compose exec web python manage.py createsuperuser
+ 3) Login with Superuser credentials 
+ 4) Navigate to Admin Controle Pannel, all the user registration requestes are found there, you can choose to accept and activate or not.
+ 5) Use the credentials of the accepted user to login
 
 ## Key Files
 
