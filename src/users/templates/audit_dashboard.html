@@ -1,0 +1,280 @@
+{% extends 'base.html' %} 
+{% block title %}Audit Dashboard{% endblock %}
+{% block content %}
+<div class="audit-dashboard">
+  <!-- Dashboard Header -->
+  <div class="bg-gradient-to-r from-primary to-secondary text-white p-8 rounded-lg mb-6 shadow-lg">
+    <h1 class="text-3xl font-bold mb-2">🔍 Audit Dashboard</h1>
+    <p class="text-lg opacity-90 mb-4">User Activity Analysis & Monitoring</p>
+    <div class="text-sm opacity-80">
+      <span>Analysis Period: {{ start_date }} to {{ end_date }}</span>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">📊</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">{{ activity_timeline|length }}</div>
+        <div class="text-sm text-gray-600 font-medium">Recent Activities</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">🔄</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">{{ most_edited_items|length }}</div>
+        <div class="text-sm text-gray-600 font-medium">Frequently Edited Items</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">📦</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">{{ product_adjustment_counts|length }}</div>
+        <div class="text-sm text-gray-600 font-medium">Stock Adjustments</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">👥</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">{{ user_adjustment_counts|length }}</div>
+        <div class="text-sm text-gray-600 font-medium">Active Users</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Activity Timeline -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold text-primary mb-4">📅 Recent Activity Timeline</h2>
+      <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2">
+        {% if activity_timeline %} {% for activity in activity_timeline %}
+        <div class="flex gap-3 p-4 border-l-3 border-secondary bg-gray-50 rounded-sm hover:bg-gray-100 transition-colors">
+          <div class="w-3 h-3 bg-secondary rounded-full mt-1 flex-shrink-0"></div>
+          <div class="flex-1 text-sm">
+            <div class="flex justify-between mb-2 text-xs text-gray-600">
+              <span class="text-gray-500">{{ activity.timestamp|timesince }} ago</span>
+              <span class="activity-status-{{ activity.status|lower }} px-2 py-1 rounded text-xs font-medium">
+                {{ activity.status }}
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center mb-2">
+              <strong>{{ activity.user }}</strong>
+              <span class="bg-secondary text-white px-2 py-1 rounded text-xs font-medium">
+                {{ activity.activity }}
+              </span>
+              {% if activity.object %}
+              <span class="text-gray-600 text-xs">{{ activity.object }}</span>
+              {% endif %}
+            </div>
+            {% if activity.ip_address %}
+            <div class="text-xs text-gray-500">IP: {{ activity.ip_address }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %} {% else %}
+        <div class="text-center py-8 text-gray-400 italic">No recent activities found</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Most Edited Items -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold text-primary mb-4">🔄 Most Frequently Edited Items</h2>
+      <div class="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2">
+        {% if most_edited_items %} {% for item in most_edited_items %}
+        <div class="p-4 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+          <div class="flex justify-between mb-2 text-xs">
+            <span class="bg-warning text-black px-2 py-1 rounded font-medium">{{ item.model }}</span>
+            <span class="bg-secondary text-white px-2 py-1 rounded font-medium">{{ item.edit_count }} edits</span>
+          </div>
+          <div class="text-sm">
+            {% if item.model == 'Product' %}
+            <strong>{{ item.name }}</strong> (SKU: {{ item.sku }})
+            {% elif item.model == 'Inbound' %}
+            <strong>{{ item.name }}</strong>
+            <div class="text-xs text-gray-600 mt-1">Supplier: {{ item.supplier }}</div>
+            {% elif item.model == 'Outbound' %}
+            <strong>{{ item.name }}</strong>
+            <div class="text-xs text-gray-600 mt-1">Client: {{ item.client }}</div>
+            {% else %}
+            <strong>{{ item.name }}</strong>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %} {% else %}
+        <div class="text-center py-8 text-gray-400 italic">No frequently edited items found</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Adjustments Analysis -->
+  <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+    <h2 class="text-xl font-semibold text-primary mb-4">📊 Stock Adjustment Patterns</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      <!-- Adjustments by User -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-primary mb-4">👤 Adjustments by User</h3>
+        <div class="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-2">
+          {% if user_adjustment_counts %}
+          {% for adjustment in user_adjustment_counts %}
+          <div class="p-3 bg-white rounded border border-gray-200 text-sm">
+            <div class="flex justify-between items-start">
+              <span class="font-semibold text-primary">{{ adjustment.user }}</span>
+              <span class="bg-secondary text-white px-2 py-1 rounded text-xs font-medium">{{ adjustment.count }} adjustments</span>
+            </div>
+            <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div class="progress-fill h-full rounded-full" style="width: {% widthratio adjustment.count 1 10 %}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-8 text-gray-400 italic">No user adjustment data available</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Adjustments by Product -->
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-primary mb-4">📦 Adjustments by Product</h3>
+        <div class="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-2">
+          {% if product_adjustment_counts %}
+          {% for adjustment in product_adjustment_counts %}
+          <div class="p-3 bg-white rounded border border-gray-200 text-sm">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="font-semibold text-primary">{{ adjustment.product }}</span>
+                {% if adjustment.sku %}
+                <span class="text-xs text-gray-600 ml-2">SKU: {{ adjustment.sku }}</span>
+                {% endif %}
+              </div>
+              <span class="bg-secondary text-white px-2 py-1 rounded text-xs font-medium">{{ adjustment.count }} adjustments</span>
+            </div>
+            <div class="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div class="progress-fill h-full rounded-full" style="width: {% widthratio adjustment.count 1 5 %}%"></div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-8 text-gray-400 italic">No product adjustment data available</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Activity Summary -->
+  <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+    <h2 class="text-xl font-semibold text-primary mb-4">👥 User Activity Summary</h2>
+    <div class="table-container">
+      <table class="w-full">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th class="p-3 text-left">User</th>
+            <th class="p-3 text-left">Role</th>
+            <th class="p-3 text-left">Total Activities</th>
+            <th class="p-3 text-left">Activity Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if user_activity_summary %} {% for user in user_activity_summary %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3">{{ user.user__username }}</td>
+            <td class="p-3">
+              <span class="role-badge-{{ user.user__role }} px-2 py-1 rounded text-xs font-medium">
+                {{ user.user__role }}
+              </span>
+            </td>
+            <td class="p-3">{{ user.total_activities }}</td>
+            <td class="p-3">
+              <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div class="meter-fill h-full rounded-full bg-green-500 !important" style="width: {% widthratio user.total_activities 1 2 %}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %} {% else %}
+          <tr>
+            <td colspan="4" class="p-4 text-center text-gray-400 italic">No user activity data available</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Activity Type Distribution -->
+  <div class="bg-white rounded-lg p-6 shadow-md">
+    <h2 class="text-xl font-semibold text-primary mb-4">📈 Activity Type Distribution</h2>
+    <div class="flex flex-col gap-3">
+      {% if activity_type_distribution %}
+      {% for activity in activity_type_distribution %}
+      <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-semibold text-primary">{{ activity.activity }}</span>
+          <span class="bg-secondary text-white px-2 py-1 rounded text-xs font-medium">{{ activity.count }} activities</span>
+        </div>
+        <div class="h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div class="type-progress-fill h-full rounded-full" style="width: {% widthratio activity.count 1 2 %}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-center py-8 text-gray-400 italic">No activity type data available</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Audit Dashboard Styles -->
+<style>
+  /* Softer status badge colors */
+  .activity-status-success { background: #d4edda; color: #155724; }
+  .activity-status-failed { background: #f8d7da; color: #721c24; }
+
+  /* Softer role badge colors */
+  .role-badge-admin { background: #f8d7da; color: #721c24; }
+  .role-badge-manager { background: #fff3cd; color: #856404; }
+  .role-badge-operator { background: #cce5ff; color: #004085; }
+
+  /* Softer progress bars */
+  .progress-fill { height: 100%; background: #d4edda; transition: width 0.3s ease; }
+  .type-progress-fill { height: 100%; background: #f6dc85; transition: width 0.3s ease; }
+  .meter-fill { height: 100%; background: #86ec9e; transition: width 0.3s ease; }
+
+  /* Table scrolling */
+  .table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+  }
+
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-container th {
+    position: sticky;
+    top: 0;
+    background: var(--primary-color);
+    color: white;
+    z-index: 10;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .grid.grid-cols-1.lg\:grid-cols-2 { grid-template-columns: 1fr; }
+    .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 480px) {
+    .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}

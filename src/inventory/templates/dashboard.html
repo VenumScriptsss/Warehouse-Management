@@ -1,0 +1,223 @@
+{% extends 'base.html' %} {% block title %}Dashboard & Insights{% endblock %}
+{%block content %}
+<div class="dashboard-container space-y-6">
+  <!-- Stats Cards Section -->
+  <div class="stats-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="stat-card bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="stat-icon bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center text-xl">📦</div>
+        <div class="stat-content">
+          <div class="stat-value text-2xl font-bold text-primary">{{ stats.total_inventory }}</div>
+          <div class="stat-label text-sm text-gray-600 font-medium">Total Inventory Items</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="stat-icon bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center text-xl">🔽</div>
+        <div class="stat-content">
+          <div class="stat-value text-2xl font-bold text-primary">{{ stats.todays_inbound }}</div>
+          <div class="stat-label text-sm text-gray-600 font-medium">Inbound Today</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1">
+      <div class="flex items-center gap-4">
+        <div class="stat-icon bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center text-xl">🔼</div>
+        <div class="stat-content">
+          <div class="stat-value text-2xl font-bold text-primary">{{ stats.todays_outbound }}</div>
+          <div class="stat-label text-sm text-gray-600 font-medium">Outbound Today</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1 {% if stats.low_stock_count > 0 %}border-l-4 border-warning{% endif %}">
+      <div class="flex items-center gap-4">
+        <div class="stat-icon bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center text-xl">⚠️</div>
+        <div class="stat-content">
+          <div class="stat-value text-2xl font-bold text-primary">{{ stats.low_stock_count }}</div>
+          <div class="stat-label text-sm text-gray-600 font-medium">Low Stock Alerts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-main grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Activity Stream -->
+    <div class="activity-section bg-white rounded-lg p-4 shadow-md">
+      <h2 class="text-xl font-semibold text-primary mb-4">Recent Activity</h2>
+      <div class="activity-stream space-y-3 max-h-96 overflow-y-auto">
+        {% if recent_activities %}
+        {% for activity in recent_activities %}
+        <div class="activity-item p-3 border border-gray-200 rounded-md bg-gray-50">
+          <div class="activity-header flex justify-between items-center mb-2 text-xs text-gray-500">
+            <span class="activity-user font-semibold text-secondary">{{ activity.user }}</span>
+            <span class="activity-type bg-secondary text-white px-2 py-1 rounded text-xs">{{ activity.activity }}</span>
+            <span class="activity-time">{{ activity.timestamp|timesince }} ago</span>
+          </div>
+          <div class="activity-message text-sm font-medium mb-2">{{ activity.message }}</div>
+          <div class="activity-status text-xs px-2 py-1 rounded inline-block {% if activity.status|lower == 'success' %}bg-success text-white{% elif activity.status|lower == 'failed' %}bg-danger text-white{% else %}bg-gray-200 text-gray-700{% endif %}">
+            {{ activity.status }}
+          </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-activities text-center py-8 text-gray-400 italic">No recent activities found</div>
+        {% endif %}
+      </div>
+    </div>
+
+  <!-- Transaction Volume Chart -->
+    <div class="chart-section bg-white rounded-lg p-4 shadow-md">
+      <h2 class="text-xl font-semibold text-primary mb-4">Daily Transaction Volume (Last 30 Days)</h2>
+      <div class="chart-container h-96">
+        <canvas id="transactionChart"></canvas>
+      </div>
+    </div>
+
+<style>
+    /* Sticky table headers for dashboard tables */
+    .table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+    }
+
+    .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-container th {
+        top: 0;
+        background: var(--primary-color) !important;
+        color: white !important;
+        z-index: 50;
+        padding: 12px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-container td {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-container tr:hover {
+        background: #f3f4f6;
+    }
+</style>
+  </div>
+
+  <!-- Low Stock Details (if any) -->
+  {% if stats.low_stock_count > 0 %}
+  <div class="low-stock-details bg-white rounded-lg p-4 shadow-md">
+    <h3 class="text-lg font-semibold text-warning mb-4">Low Stock Products</h3>
+    <div class="table-container overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th class="p-3 text-left">Product Name</th>
+            <th class="p-3 text-left">SKU</th>
+            <th class="p-3 text-left">Current Stock</th>
+            <th class="p-3 text-left">Warehouse</th>
+            <th class="p-3 text-left">Threshold</th>
+            <th class="p-3 text-left">Shortage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in stats.low_stock_products %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3">{{ product.product.name }}</td>
+            <td class="p-3">{{ product.product.sku }}</td>
+            <td class="p-3">{{ product.current_stock }}</td>
+            <td class="p-3">{{ product.warehouse.name }}</td>
+            <td class="p-3">{{ product.threshold }}</td>
+            <td class="p-3 text-danger">-{{ product.shortage }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chart Initialization -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('transactionChart').getContext('2d');
+
+    const chartData = {
+      labels: {{ chart_data.labels|safe }},
+      datasets: [
+        {
+          label: 'Inbound Transactions',
+          data: {{ chart_data.inbound_data|safe }},
+          backgroundColor: 'rgba(40, 167, 69, 0.2)',
+          borderColor: 'rgba(40, 167, 69, 1)',
+          borderWidth: 2,
+          tension: 0.1
+        },
+        {
+          label: 'Outbound Transactions',
+          data: {{ chart_data.outbound_data|safe }},
+          backgroundColor: 'rgba(220, 53, 69, 0.2)',
+          borderColor: 'rgba(220, 53, 69, 1)',
+          borderWidth: 2,
+          tension: 0.1
+        }
+      ]
+    };
+
+    const config = {
+      type: 'line',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Number of Transactions'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            },
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.raw;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    new Chart(ctx, config);
+  });
+</script>
+{% endblock %}

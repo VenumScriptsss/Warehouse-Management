@@ -1,0 +1,113 @@
+# Warehouse Management System
+
+A production-grade, full-stack Warehouse Management System (WMS) built with Django and Tailwind CSS, designed for efficient digital operations across inventory, inbound, outbound, and user workflows. The system is containerized with Docker and follows modern deployment architecture.
+
+## Features
+
+### Core Features
+- **Inventory Management**: Add, update, archive, and delete products with fields: name, SKU, tags, description, category, quantity
+- **Real-time Inventory Tracking**: Complete audit logs for all inventory changes
+- **Search & Filtering**: By keyword, tag, category, or SKU
+- **Low Stock Alerts**: Configurable thresholds with real-time notifications
+- **Bulk Operations**: CSV/XLSX import/export for inventory management
+
+### Inbound Management
+- **Incoming Stock Logging**: Product, supplier, quantity, invoice/reference document, received date
+- **Bulk Inbound Uploads**: Via CSV/XLSX files
+- **File Attachments**: Support for invoices, delivery orders, and other documents
+- **Automatic Inventory Updates**: Real-time stock level adjustments
+- **Supplier Association**: Link inbound shipments to supplier records
+
+### Outbound Management
+- **Outbound Transactions**: Product, quantity, customer, sales order reference, date
+- **Negative Stock Prevention**: System validation to prevent invalid dispatches
+- **Bulk Outbound Uploads**: Via CSV/XLSX files
+- **File Attachment Support**: For signed delivery orders and other documents
+- **Real-time Inventory Deduction**: Immediate stock level updates
+
+### User & Role Management
+- **Authentication & Authorization**: Session/JWT-based security
+- **Role-Based Access Control**: Admin, Manager, Operator roles
+- **Granular Permissions**: Read/write/delete permissions per module
+- **Activity Logging**: Comprehensive audit trail of user actions
+
+### Dashboard & Insights
+- **Key Statistics**: Total inventory items, inbound/outbound transactions, low stock alerts
+- **Recent Activity Stream**: Real-time view of system activities
+- **Transaction Volume Charts**: Daily/weekly/monthly visualizations
+
+### Additional Features Implemented
+- **Multi-Warehouse Support**: Per-warehouse quantity tracking and internal stock transfers
+- **Cycle Count & Reconciliation**: Manual stock counting with discrepancy logging
+- **Inventory Valuation**: Product cost tracking with total stock valuation reports
+- **Audit Dashboard**: Visual activity logs and frequent adjustment tracking
+
+## Project Structure
+
+```
+src/
+├── inventory/          # Main inventory application
+├── users/              # User management and authentication
+├── mysite/             # Django project configuration
+├── static/             # CSS/JS assets
+└── templates/          # HTML templates
+```
+
+## Setup Instructions
+
+1. **Prerequisites**:
+   - Python 3.8+
+   - Node.js (for frontend assets)
+   - Docker (optional, for containerized deployment)
+
+2. **Installation**:
+   ```bash
+   # Clone the repository
+   git clone [your-repo-url]
+   cd Warehouse\ Management/src
+
+   # Install Python dependencies
+   pip install -r requirements.txt
+
+   # Install Node dependencies
+   npm install
+
+   # Run migrations
+   python manage.py migrate
+
+   # Start development server
+   python manage.py runserver
+   ```
+
+3. **Docker Setup** (optional):
+   ```bash
+   docker-compose up --build
+   ```
+
+## Configuration
+
+- **Database**: SQLite (default) or PostgreSQL
+- **Environment Variables**: Configure in `.env` file
+- **Tailwind CSS**: Configured in `tailwind.config.js`
+- **Docker**: Containerized deployment with `docker-compose.yml`
+
+## Technology Stack
+
+- **Backend**: Django (Python)
+- **Frontend**: Tailwind CSS + Vanilla JavaScript
+- **Database**: SQLite/PostgreSQL
+- **Containerization**: Docker + Docker Compose
+- **Deployment**: AWS EC2 ready architecture with Nginx reverse proxy support
+
+## Usage
+
+1. Access the application at `http://localhost:8000`
+2. Login with admin credentials (create superuser with `python manage.py createsuperuser`)
+3. Navigate through the dashboard to manage inventory, warehouses, and users
+
+## Key Files
+
+- `inventory/models.py` - Database models
+- `inventory/views.py` - View logic
+- `users/views.py` - Authentication and user management
+- `mysite/settings.py` - Django configuration

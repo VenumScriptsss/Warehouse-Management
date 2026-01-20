@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Home - Warehouse Management{% endblock %}
+
+{% block content %}
+<div class="homepage-grid">
+    <a href="{% url 'products' %}" class="homepage-card-link">
+        <div class="homepage-card">
+            <div class="card-icon">📦</div>
+            <h2>Products</h2>
+            <p>View and manage all products</p>
+        </div>
+    </a>
+
+    <a href="{% url 'inventory' %}" class="homepage-card-link">
+        <div class="homepage-card">
+            <div class="card-icon">🏭</div>
+            <h2>Inventory</h2>
+            <p>Manage inventory levels and stock movements</p>
+        </div>
+    </a>
+
+    <a href="{% url 'insights' %}" class="homepage-card-link">
+        <div class="homepage-card">
+            <div class="card-icon">📊</div>
+            <h2>Dashboards & Insights</h2>
+            <p>View analytics, reports, and system insights</p>
+        </div>
+    </a>
+</div>
+
+<style>
+    .homepage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .homepage-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .homepage-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--secondary-color);
+    }
+
+    .homepage-card h2 {
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+        font-weight: 700; /* Make titles bold */
+    }
+
+    .homepage-card p {
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    
+
+    /* Make entire card clickable */
+    .homepage-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .homepage-card-link:hover .homepage-card {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 768px) {
+        .homepage-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

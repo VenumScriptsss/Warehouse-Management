@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}Edit Warehouse{% endblock %}
+
+{% block content %}
+<div class="edit-warehouse">
+    <h1>Edit Warehouse</h1>
+    <p class="subtitle">Update details for {{ warehouse.name }}</p>
+
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Warehouse Name:</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="error-message">{{ form.name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Location:</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                <div class="error-message">{{ form.location.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Warehouse</button>
+                <a href="{% url 'warehouse-management' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .edit-warehouse {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .edit-warehouse h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .edit-warehouse .subtitle {
+        color: var(--dark-color);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .form-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark-color);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    @media (max-width: 480px) {
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+<task_progress>
+- [x] Read TODO file to understand tasks
+- [x] Examine admin control panel structure
+- [x] Check for existing warehouse model
+- [x] Check current URL structure
+- [x] Check inventory views pattern
+- [x] Create warehouse form
+- [x] Add warehouse views
+- [x] Add warehouse URLs
+- [x] Create warehouse management page template
+- [x] Create add warehouse template
+- [x] Create edit warehouse template
+- [ ] Create delete warehouse template
+- [ ] Add redirect button to admin control panel
+- [ ] Create forbidden page template
+- [ ] Update error handling to use forbidden page
+</task_progress>
+</write_to_file>

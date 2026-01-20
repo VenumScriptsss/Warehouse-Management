@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Product</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f9fafb;
+        color: #111827;
+        margin: 0;
+        padding: 24px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 640px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 32px;
+      }
+
+      h1 {
+        margin-top: 0;
+        color: #1e40af;
+        font-size: 1.8rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+
+      .required::after {
+        content: " *";
+        color: #ef4444;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-size: 1.05rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      button:active {
+        background: #1e40af;
+      }
+
+      .form-actions {
+        margin-top: 2rem;
+        text-align: right;
+      }
+
+      .message {
+        margin-top: 1.5rem;
+        padding: 12px;
+        border-radius: 6px;
+        display: none;
+      }
+
+      .success {
+        background: #ecfdf5;
+        color: #065f46;
+      }
+      .error {
+        background: #fef2f2;
+        color: #991b1b;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="margin-bottom: 1rem;">
+      <a href="/home/inventory/" style="background: #6b7280; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">Back to Inventory</a>
+    </div>
+
+    <div class="container">
+      <h1>Add New Product</h1>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="code" class="required">Product SKU</label>
+          <input
+            type="text"
+            id="code"
+            name="sku"
+            required
+            placeholder="SKU-45678"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="name" class="required">Product Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            required
+            placeholder="ex: Wireless Mechanical Keyboard"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <input
+            type="text"
+            id="category"
+            name="category"
+            placeholder="ex: Peripherals / Audio / Mobile"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="price" class="required">Price (RM)</label>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            step="1"
+            min="0"
+            required
+            placeholder="ex: 189.90"
+          />
+        </div>
+        <div class="form-group">
+            <label for="threshold" class="">Low Stock Threshold</label>
+            <input
+                type="number"
+                id="threshold"
+                name="threshold"
+                step="1"
+                min="0"
+                placeholder="Minimum value to not alert low stock"
+            />
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="ex: Ergonomic design, RGB lighting, hot-swappable switches, ..."
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit">Save Product</button>
+        </div>
+
+        <!-- Bulk upload section -->
+        <div class="form-group">
+          <label>OR - Bulk Upload Products via Excel</label>
+          <div style="border: 2px dashed #d1d5db; border-radius: 6px; padding: 16px; text-align: center; margin-top: 10px;">
+            <input
+              type="file"
+              id="excel_file"
+              name="excel_file"
+              accept=".xlsx, .xls"
+              style="display: none;"
+              onchange="handleFileUpload()"
+            />
+            <label for="excel_file" style="cursor: pointer; display: block;">
+              <div style="margin-bottom: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; color: #3b82f6;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <span style="color: #3b82f6; font-weight: 500;">Click to upload Excel file</span>
+              <div style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+                Supported format: .xlsx, .xls
+              </div>
+              <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 8px;">
+                Required columns: SKU, product_name, category, price, threshold, description
+              </div>
+            </label>
+          </div>
+
+          <!-- File name display (hidden by default) -->
+          <div id="file-info" style="display: none; margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 4px; font-size: 0.85rem;">
+            <span style="color: #111827; font-weight: 500;">Selected file:</span>
+            <span id="file-name" style="color: #3b82f6; margin-left: 6px;"></span>
+            <span id="file-size" style="color: #6b7280; margin-left: 6px;"></span>
+          </div>
+
+          <!-- Upload button (hidden by default) -->
+          <div id="upload-button-container" style="display: none; margin-top: 12px;">
+            <button type="button" onclick="confirmUpload()" style="background: #10b981; margin-right: 8px;">Upload & Process</button>
+            <button type="button" onclick="cancelUpload()" style="background: #ef4444;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Optional: show success/error after redirect or via JS/AJAX -->
+        <div id="form-message" class="message"></div>
+      </form>
+
+      <!-- JavaScript for file upload handling -->
+      <script>
+        function handleFileUpload() {
+          const fileInput = document.getElementById('excel_file');
+          const fileInfo = document.getElementById('file-info');
+          const fileName = document.getElementById('file-name');
+          const fileSize = document.getElementById('file-size');
+          const uploadButtonContainer = document.getElementById('upload-button-container');
+
+          if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileName.textContent = file.name;
+            fileSize.textContent = `(${formatFileSize(file.size)})`;
+            fileInfo.style.display = 'block';
+            uploadButtonContainer.style.display = 'block';
+          } else {
+            fileInfo.style.display = 'none';
+            uploadButtonContainer.style.display = 'none';
+          }
+        }
+
+        function formatFileSize(bytes) {
+          if (bytes < 1024) return bytes + ' bytes';
+          else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+          else return (bytes / 1048576).toFixed(2) + ' MB';
+        }
+
+        function confirmUpload() {
+          if (confirm('Are you sure you want to upload and process this file? This will create new products in the system.')) {
+            // Create a hidden input to indicate this is a bulk upload
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'bulk_upload';
+            hiddenInput.value = 'true';
+            document.querySelector('form').appendChild(hiddenInput);
+
+            // Submit the form
+            document.querySelector('form').submit();
+          }
+        }
+
+        function cancelUpload() {
+          const fileInput = document.getElementById('excel_file');
+          const fileInfo = document.getElementById('file-info');
+          const uploadButtonContainer = document.getElementById('upload-button-container');
+
+          // Clear the file input
+          fileInput.value = '';
+          fileInfo.style.display = 'none';
+          uploadButtonContainer.style.display = 'none';
+        }
+      </script>
+
+      <!-- Display messages from Django -->
+      {% if messages %}
+      <div style="margin-top: 20px;">
+        {% for message in messages %}
+        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}" style="display: block; margin-bottom: 8px;">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

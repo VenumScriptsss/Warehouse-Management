@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Login Required{% endblock %}
+
+{% block content %}
+<div class="login-required-page">
+    <div class="login-required-content">
+        <h1>401 - Login Required</h1>
+        <p class="subtitle">You need to login to access this page</p>
+
+        <div class="login-required-icon">
+            <i class="fas fa-sign-in-alt"></i>
+        </div>
+
+        <div class="login-required-message">
+            <p>This page requires authentication. Please login to continue.</p>
+            <p>If you don't have an account, you can sign up first.</p>
+        </div>
+
+        <div class="login-required-actions">
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            <a href="{% url 'signin' %}" class="btn btn-outline">Sign Up</a>
+            <a href="{% url 'index' %}" class="btn btn-secondary">Return to Home</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-required-page {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        padding: 2rem 0;
+    }
+
+    .login-required-content {
+        text-align: center;
+        max-width: 600px;
+        width: 100%;
+        padding: 2rem;
+    }
+
+    .login-required-content h1 {
+        color: #6c757d;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-required-content .subtitle {
+        color: var(--dark-color);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .login-required-icon {
+        font-size: 4rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .login-required-message {
+        background: #e2e3e5;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
+    .login-required-message p {
+        margin: 0;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .login-required-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        border-color: #545b62;
+    }
+
+    @media (max-width: 480px) {
+        .login-required-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+<task_progress>
+- [x] Read TODO file to understand original tasks
+- [x] Complete warehouse management functionality
+- [x] Complete forbidden page functionality
+- [x] Check current Django settings for login configuration
+- [x] Add login URL configuration
+- [x] Add custom login required view
+- [x] Create custom login required template
+- [ ] Add URL pattern for login required
+- [ ] Test the implementation
+</task_progress>
+</write_to_file>

@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Inventory - Warehouse Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Inventory Management</h1>
+    <div class="header-actions">
+        <a href="{% url 'inventory-regInbound' %}" class="btn btn-success px-4 py-2 bg-secondary text-white rounded hover:bg-primary transition-all">Register Inbound</a>
+        <a href="{% url 'inventory-regOutbound' %}" class="btn btn-success px-4 py-2 bg-secondary text-white rounded hover:bg-primary transition-all">Register Outbound</a>
+    </div>
+</div>
+
+<div class="filter-section">
+    <form method="get" class="filter-form">
+        <div class="filter-group">
+            <label for="category-filter">Category:</label>
+            <select id="category-filter" name="category" class="filter-select">
+                <option value="">All Categories</option>
+                {% for category in category_list %}
+                    <option value="{{category}}">{{category}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="warehouse-filter">Warehouse:</label>
+            <select id="warehouse-filter" name="warehouse" class="filter-select">
+                <option value="">All Warehouses</option>
+                {% for warehouse in warehouses %}
+                    <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="search-filter">Search:</label>
+            <input type="text" id="search-filter" name="search" placeholder="Search by name or SKU" class="filter-input">
+        </div>
+
+        <div class="filter-actions flex gap-2">
+            <button type="submit" class="btn btn-secondary px-4 py-2 bg-secondary text-white rounded hover:bg-blue-700 transition-all">Apply Filters</button>
+            <a href="{% url 'inventory' %}" class="btn btn-outline px-4 py-2 border border-secondary text-secondary rounded hover:bg-secondary hover:text-white transition-all">Reset</a>
+        </div>
+        <!-- <a href="{% url 'inventory' %}" class="btn btn-outline px-4 py-2 border border-secondary text-secondary rounded hover:bg-secondary hover:text-white transition-all">Reset</a> -->
+    </form>
+</div>
+
+<div class="inventory-container">
+    <div class="table-container">
+        <table class="w-full">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th class="p-3 text-left">SKU</th>
+                    <th class="p-3 text-left">Product Name</th>
+                    <th class="p-3 text-left">Category</th>
+                    <th class="p-3 text-left">Warehouse</th>
+                    <th class="p-3 text-left">Stock</th>
+                    <th class="p-3 text-left">Last Updated</th>
+                    <th class="p-3 text-left">Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv_prod in inventory %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">{{ inv_prod.product.sku }}</td>
+                    <td class="p-3">{{ inv_prod.product.name }}</td>
+                    <td class="p-3">{{ inv_prod.product.category }}</td>
+                    <td class="p-3">
+                        {% if inv_prod.warehouse %}
+                            {{ inv_prod.warehouse.name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td class="p-3">{{ inv_prod.quantity }}</td>
+                    <td class="p-3">{{ inv_prod.updated_at }}</td>
+                    <td class="p-3">{{ inv_prod.expiry_date|default:"N/A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-header h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-section {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        font-weight: 500;
+        color: var(--dark-color);
+        font-size: 0.9rem;
+    }
+
+    .filter-select, .filter-input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .inventory-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Table scrolling */
+    .table-container {
+        max-height: 600px;
+        overflow: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+    }
+
+    .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-container th {
+        top: 0;
+        background: var(--primary-color) !important;
+        color: white !important;
+        z-index: 50;
+        padding: 12px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-container td {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-container tbody tr:hover {
+        background: #f3f4f6;
+    }
+
+    @media (max-width: 768px) {
+        .filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+    }
+</style>
+{% endblock %}

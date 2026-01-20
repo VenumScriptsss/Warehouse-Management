@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Delete Warehouse{% endblock %}
+
+{% block content %}
+<div class="delete-warehouse">
+    <h1>Delete Warehouse</h1>
+    <p class="subtitle">Are you sure you want to delete this warehouse?</p>
+
+    <div class="confirmation-container">
+        <div class="warehouse-details">
+            <h3>Warehouse Details</h3>
+            <p><strong>Name:</strong> {{ warehouse.name }}</p>
+            <p><strong>Location:</strong> {{ warehouse.location|default:"N/A" }}</p>
+        </div>
+
+        <div class="warning-message">
+            <p><strong>Warning:</strong> This action cannot be undone. All related inventory records will be affected.</p>
+        </div>
+
+        <div class="confirmation-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                <a href="{% url 'warehouse-management' %}" class="btn btn-outline">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .delete-warehouse {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .delete-warehouse h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-warehouse .subtitle {
+        color: var(--dark-color);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .confirmation-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+    }
+
+    .warehouse-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .warehouse-details h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .warehouse-details p {
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+    }
+
+    .warning-message {
+        background: #fff3cd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+    .warning-message p {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+        border-color: #bd2130;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    @media (max-width: 480px) {
+        .confirmation-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+<task_progress>
+- [x] Read TODO file to understand tasks
+- [x] Examine admin control panel structure
+- [x] Check for existing warehouse model
+- [x] Check current URL structure
+- [x] Check inventory views pattern
+- [x] Create warehouse form
+- [x] Add warehouse views
+- [x] Add warehouse URLs
+- [x] Create warehouse management page template
+- [x] Create add warehouse template
+- [x] Create edit warehouse template
+- [x] Create delete warehouse template
+- [ ] Add redirect button to admin control panel
+- [ ] Create forbidden page template
+- [ ] Update error handling to use forbidden page
+</task_progress>
+</write_to_file>

@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% block title %}Admin Control Panel - User Management{% endblock %}
+
+{% block content %}
+<div class="admin-control-panel">
+    <h1>Admin Control Panel</h1>
+    <p class="subtitle">Manage user accounts and approvals</p>
+
+    <!-- Success/Error Messages -->
+    <!-- {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %} -->
+
+    <!-- Filter Controls -->
+    <div class="filter-controls">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <label for="status-filter">Status:</label>
+                <select id="status-filter" name="status" class="filter-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Users</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive (Pending)</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="search-filter">Search:</label>
+                <input type="text" id="search-filter" name="search" placeholder="Search by username, email"
+                       value="{{ search_query }}" class="filter-input">
+            </div>
+
+            <button type="submit" class="btn btn-secondary px-4 py-2 bg-secondary text-white rounded hover:bg-blue-700 transition-all">Apply Filters</button>
+            <a href="{% url 'admin-control-panel' %}" class="btn btn-secondary px-4 py-2 bg-secondary text-white rounded hover:bg-blue-700 transition-all">Reset</a>
+        </form>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="user-stats">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <p class="stat-number">{{ users.count }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active Users</h3>
+            <p class="stat-number">{{ active_users_count }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Approval</h3>
+            <p class="stat-number">{{ none_active_users_count }}</p>
+        </div>
+    </div>
+
+    <!-- Admin Actions -->
+    <div class="admin-actions">
+        <a href="{% url 'warehouse-management' %}" class="btn btn-success px-4 py-2 bg-success text-white rounded hover:bg-blue-700 transition-all">Manage Warehouses</a>
+    </div>
+
+    <!-- User List -->
+    <div class="user-list">
+        <div class="table-container">
+            <table class="w-full">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th class="p-3 text-left">Username</th>
+                        <th class="p-3 text-left">Email</th>
+                        <th class="p-3 text-left">Role</th>
+                        <th class="p-3 text-left">Warehouse</th>
+                        <th class="p-3 text-left">Status</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3">{{ user.username }}</td>
+                        <td class="p-3">{{ user.email }}</td>
+                        <td class="p-3"><span class="role-badge-{{ user.role }} px-2 py-1 rounded text-xs font-medium">{{ user.role }}</span></td>
+                        <td class="p-3">
+                            {% if user.warehouse %}
+                                {{ user.warehouse.name }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            {% if user.is_active %}
+                                <span class="status-badge-active px-2 py-1 rounded text-xs font-medium">Active</span>
+                            {% else %}
+                                <span class="status-badge-inactive px-2 py-1 rounded text-xs font-medium">Pending Approval</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            {% if user.is_active %}
+                                <form method="post" class="action-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="deactivate">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger px-3 py-1 bg-danger text-white rounded hover:bg-red-700 transition-all" onclick="return confirm('Are you sure you want to deactivate {{ user.username }}?')">Deactivate</button>
+                                </form>
+                            {% else %}
+                                <form method="post" class="action-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="activate">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <button type="submit" class="btn btn-sm btn-success px-3 py-1 bg-success text-white rounded hover:bg-green-700 transition-all">Activate</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-gray-400 italic">No users found matching your criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-control-panel {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .admin-control-panel h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .admin-control-panel .subtitle {
+        color: var(--dark-color);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .filter-controls {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        font-weight: 500;
+        color: var(--dark-color);
+        font-size: 0.9rem;
+    }
+
+    .filter-select, .filter-input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .filter-input {
+        width: 100%;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .user-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+    }
+
+    .user-list {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    th {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+    }
+
+    /* Table row hover - exclude header rows */
+    tr:not(:has(th)):hover {
+        background: #f5f5f5;
+    }
+
+    /* Disable table header hover effect */
+    th:hover {
+        background: var(--primary-color) !important;
+        color: white !important;
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    /* Softer role badge colors - using hyphenated class names */
+    .role-badge-admin {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .role-badge-manager {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .role-badge-operator {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    /* Softer status badge colors - using hyphenated class names */
+    .status-badge-active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge-inactive {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .action-form {
+        display: inline;
+        margin-right: 0.5rem;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .admin-actions {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Table scrolling */
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+    }
+
+    .table-container table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-container th {
+        top: 0;
+        background: var(--primary-color) !important;
+        color: white !important;
+        z-index: 50;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            min-width: 100%;
+        }
+
+        table {
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 8px 6px;
+        }
+    }
+</style>
+{% endblock %}

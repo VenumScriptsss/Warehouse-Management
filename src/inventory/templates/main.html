@@ -1,0 +1,171 @@
+{% extends 'base.html' %} {% block title %}Inventory Management{% endblock %}
+{%block content %}
+<div class="header-actions">
+  {% if user.role == 'admin' or user.role == 'manager' %}
+  <div class="admin-only">
+    <a href="add-product" class="btn btn-success">Add Product</a>
+  </div>
+  {% endif %}
+  <a href="register-inbound" class="btn btn-primary">Register Inbound</a>
+  <a href="register-outbound" class="btn btn-primary">Register Outbound</a>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="products">Products List</button>
+  <button class="tab" data-tab="inventory">Inventory</button>
+</div>
+
+<div id="products" class="content active">
+  <h2>Our Products</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Product Name</th>
+        <th>Category</th>
+        <th>Price (RM)</th>
+        <th>Description</th>
+        {% if user.role == 'admin' or user.role == 'manager' %}
+        <th class="admin-only">Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products_list %}
+      <tr>
+        <td>{{product.sku}}</td>
+        <td>{{product.name}}</td>
+        <td>{{product.category}}</td>
+        <td>{{product.price}}</td>
+        <td>{{product.description}}</td>
+        {% if user.role == 'admin' or user.role == 'manager' %}
+        <td class="admin-only">
+          <a href="#" class="btn btn-sm btn-secondary">Edit</a>
+          <a href="#" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="inventory" class="content">
+  <h2>Current Inventory Status</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Product Name</th>
+        <th>Stock</th>
+        <th>Last Updated</th>
+        <th>Expiry Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inv_prod in inventory %}
+      <tr>
+        <td>{{inv_prod.product.sku}}</td>
+        <td>{{inv_prod.product.name}}</td>
+        <td>{{inv_prod.quantity}}</td>
+        <td>{{inv_prod.updated_at}}</td>
+        <td>{{inv_prod.expiry_date}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tabs {
+    display: flex;
+    margin: 1.5rem 0 1rem;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    font-weight: 500;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab.active {
+    border-bottom: 3px solid var(--secondary-color);
+    color: var(--secondary-color);
+  }
+
+  .tab:hover:not(.active) {
+    background: #f0f4f8;
+  }
+
+  .content {
+    display: none;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .content.active {
+    display: block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  th,
+  td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:hover {
+    background: #f5f5f5;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+</style>
+
+<script>
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      // remove active from all tabs & contents
+      document
+        .querySelectorAll(".tab")
+        .forEach((t) => t.classList.remove("active"));
+      document
+        .querySelectorAll(".content")
+        .forEach((c) => c.classList.remove("active"));
+
+      // add active to clicked tab & corresponding content
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+    });
+  });
+</script>
+{% endblock %}

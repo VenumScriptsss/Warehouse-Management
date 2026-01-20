@@ -1,0 +1,328 @@
+{% extends 'base.html' %} 
+{% load math_filters %}
+{% block title %}Inventory Valuation{% endblock %}
+{% block content %}
+
+<div class="valuation-dashboard">
+  <!-- Dashboard Header -->
+  <div class="bg-gradient-to-r from-primary to-success text-white p-8 rounded-lg mb-6 shadow-lg">
+    <h1 class="text-3xl font-bold mb-2">💰 Inventory Valuation</h1>
+    <p class="text-lg opacity-90 mb-4">Real-time Inventory Cost Analysis</p>
+    <div class="text-sm opacity-80">
+      <span>Last Updated: {{ last_updated|date:"M d, Y H:i:s" }}</span>
+    </div>
+  </div>
+
+  <!-- Valuation Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">💵</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">${{ valuation_metrics.total_inventory_value|floatformat:2 }}</div>
+        <div class="text-sm text-gray-600 font-medium">Total Inventory Value</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">📈</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">${{ valuation_metrics.total_potential_value|floatformat:2 }}</div>
+        <div class="text-sm text-gray-600 font-medium">Potential Retail Value</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">📊</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">{{ valuation_metrics.valuation_ratio|floatformat:1 }}%</div>
+        <div class="text-sm text-gray-600 font-medium">Cost-to-Retail Ratio</div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-md flex items-center gap-4 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
+      <div class="text-3xl bg-secondary text-white w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">🏷️</div>
+      <div class="flex-1">
+        <div class="text-2xl font-semibold text-primary mb-1">${{ valuation_metrics.average_cost_across_inventory|floatformat:2 }}</div>
+        <div class="text-sm text-gray-600 font-medium">Avg Cost per Unit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Valuation Chart -->
+  <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+    <h2 class="text-xl font-semibold text-primary mb-4">📊 Valuation by Category</h2>
+    <div class="h-[400px]">
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Category Breakdown -->
+  <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+    <h2 class="text-xl font-semibold text-primary mb-4">📋 Category Valuation Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+      {% for category in category_valuations %}
+      <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:transform hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-primary">{{ category.category }}</h3>
+          <span class="bg-secondary text-white px-3 py-1 rounded-full text-sm font-medium">{{ category.percentage|floatformat:1 }}%</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+          <div>
+            <div class="text-gray-600 text-xs">Total Value:</div>
+            <div class="font-semibold text-primary">${{ category.total_value|floatformat:2 }}</div>
+          </div>
+          <div>
+            <div class="text-gray-600 text-xs">Total Quantity:</div>
+            <div class="font-semibold text-primary">{{ category.total_quantity }}</div>
+          </div>
+        </div>
+        <div class="category-products">
+          <h4 class="text-sm font-medium text-primary mb-2">Top Products:</h4>
+          <ul class="text-sm space-y-1">
+            {% for product in category.products|slice:":3" %}
+            <li class="flex justify-between py-1 border-b border-gray-200 last:border-b-0">
+              <span class="font-medium">{{ product.name }}</span>
+              <span class="text-success font-semibold">${{ product.total_value|floatformat:2 }}</span>
+            </li>
+            {% endfor %}
+            {% if category.products|length > 3 %}
+            <li class="text-center text-gray-500 text-xs italic pt-2">+{{ category.products|length|add:"-3" }} more</li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Product Valuation Table -->
+  <div class="bg-white rounded-lg p-6 shadow-md mb-6">
+    <h2 class="text-xl font-semibold text-primary mb-4">📦 Individual Product Valuations</h2>
+    <div class="table-container mt-4">
+      <table class="w-full">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th class="p-3 text-left">SKU</th>
+            <th class="p-3 text-left">Product Name</th>
+            <th class="p-3 text-left">Category</th>
+            <th class="p-3 text-left">Quantity</th>
+            <th class="p-3 text-left">Avg Cost</th>
+            <th class="p-3 text-left">Total Value</th>
+            <th class="p-3 text-left">Current Price</th>
+            <th class="p-3 text-left">Potential Value</th>
+            <th class="p-3 text-left">Profit Margin</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in product_valuations %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3">{{ product.sku }}</td>
+            <td class="p-3">{{ product.name }}</td>
+            <td class="p-3"><span class="bg-secondary text-white px-2 py-1 rounded text-xs font-medium">{{ product.category }}</span></td>
+            <td class="p-3">{{ product.quantity }}</td>
+            <td class="p-3">${{ product.average_cost|floatformat:2 }}</td>
+            <td class="p-3">${{ product.total_value|floatformat:2 }}</td>
+            <td class="p-3">${{ product.current_price|floatformat:2 }}</td>
+            <td class="p-3">${{ product.potential_value|floatformat:2 }}</td>
+            <td class="p-3">
+              {% if product.current_price > 0 %}
+                {% with margin=product.current_price|sub:product.average_cost|div:product.current_price|mul:100 %}
+                <span class="profit-margin {% if margin|gt:0 %}positive{% else %}negative{% endif %} px-2 py-1 rounded text-xs font-medium">{{ margin|floatformat:1 }}%</span>
+                {% endwith %}
+              {% else %}
+              <span class="profit-margin px-2 py-1 rounded text-xs font-medium">N/A</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="bg-gray-50 font-semibold">
+          <tr>
+            <td colspan="4" class="p-3"><strong>Totals:</strong></td>
+            <td class="p-3"><strong>${{ valuation_metrics.average_cost_across_inventory|floatformat:2 }}</strong></td>
+            <td class="p-3"><strong>${{ valuation_metrics.total_inventory_value|floatformat:2 }}</strong></td>
+            <td class="p-3"><strong>${{ valuation_metrics.total_potential_value|floatformat:2 }}</strong></td>
+            <td colspan="2" class="p-3"><strong>{{ valuation_metrics.valuation_ratio|floatformat:1 }}% Ratio</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Valuation Insights -->
+  <div class="bg-white rounded-lg p-6 shadow-md">
+    <h2 class="text-xl font-semibold text-primary mb-6">💡 Valuation Insights</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-primary mb-4">📈 Highest Value Categories</h3>
+        <ol class="space-y-2 text-sm">
+          {% for category in category_valuations|slice:":3" %}
+          <li class="flex justify-between">
+            <strong>{{ category.category }}</strong>
+            <span class="font-semibold text-success">${{ category.total_value|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-primary mb-4">🔝 Top Valued Products</h3>
+        <ol class="space-y-2 text-sm">
+          {% for product in product_valuations|dictsortreversed:"total_value"|slice:":5" %}
+          <li class="flex justify-between">
+            <strong>{{ product.name }}</strong>
+            <span class="font-semibold text-success">${{ product.total_value|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="bg-gray-50 rounded-lg p-4">
+        <h3 class="text-lg font-medium text-primary mb-4">💰 Best Profit Margins</h3>
+        <ol class="space-y-2 text-sm">
+          {% for product in product_valuations %}
+            {% if product.current_price > 0 %}
+              {% with margin_raw=product.current_price|sub:product.average_cost|div:product.current_price|mul:100 %}
+                {% if margin_raw > 0 %}
+                  <li class="flex justify-between">
+                    <strong>{{ product.name }}</strong>
+                    <span class="font-semibold text-success">{{ margin_raw|floatformat:1 }}% margin</span>
+                  </li>
+                {% endif %}
+              {% endwith %}
+            {% endif %}
+          {% endfor %}
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Category Valuation Chart Initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Extract category data from Django template context using JSON
+    const categoryData = {
+        labels: JSON.parse('[{% for category in category_valuations %}"{{ category.category }}"{% if not forloop.last %},{% endif %}{% endfor %}]'),
+        values: JSON.parse('[{% for category in category_valuations %}{{ category.total_value|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}]'),
+        percentages: JSON.parse('[{% for category in category_valuations %}{{ category.percentage|floatformat:1 }}{% if not forloop.last %},{% endif %}{% endfor %}]')
+    };
+
+    // Generate colors for each category
+    const colors = [
+        '#4F46E5', '#059669', '#DC2626', '#F59E0B', '#8B5CF6',
+        '#EC4899', '#10B981', '#3B82F6', '#EF4444', '#14B8A6'
+    ];
+
+    // Get category-specific colors or use default palette
+    const backgroundColors = categoryData.labels.map((label, index) => {
+        return colors[index % colors.length];
+    });
+
+    const borderColors = backgroundColors.map(color => {
+        // Darken color for border
+        const rgb = hexToRgb(color);
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.8)`;
+    });
+
+    // Create the chart
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: categoryData.labels,
+            datasets: [{
+                data: categoryData.values,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 15,
+                        font: {
+                            size: 12,
+                            family: 'sans-serif'
+                        },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const percentage = categoryData.percentages[context.dataIndex] || 0;
+                            return [
+                                `${label}: $${value.toFixed(2)}`,
+                                `(${percentage}% of total)`
+                            ];
+                        }
+                    }
+                },
+                title: {
+                    display: false
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        }
+    });
+
+    // Helper function to convert hex to RGB
+    function hexToRgb(hex) {
+        // Remove # if present
+        hex = hex.replace('#', '');
+
+        // Parse r, g, b values
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+
+        return { r, g, b };
+    }
+});
+</script>
+
+<!-- Minimal CSS for dynamic classes that can't be handled by Tailwind alone -->
+<style>
+  /* Softer profit margin classes */
+  .profit-margin.positive { background: #d4edda; color: #155724; }
+  .profit-margin.negative { background: #f8d7da; color: #721c24; }
+  .profit-margin { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+
+  /* Table scrolling */
+  .table-container {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+  }
+
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-container th {
+    position: sticky;
+    top: 0;
+    background: var(--primary-color);
+    color: white;
+    z-index: 10;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,533 @@
+{% block content %}
+<style>
+  h2,
+  h3 {
+    margin-bottom: 10px;
+  }
+
+  .back-button {
+    display: inline-block;
+    background: #6b7280;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 15px;
+  }
+
+  .back-button:hover {
+    background: #4b5563;
+  }
+
+  form {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-row {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #374151;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  table.inbound-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  table.inbound-table th,
+  table.inbound-table td {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+  }
+
+  table.inbound-table th {
+    background: #1a3c5e;
+    color: white;
+    font-weight: 600;
+  }
+
+  table.inbound-table tr:nth-child(even) {
+    background: #f9fafb;
+  }
+
+  table.inbound-table tr:hover {
+    background: #f3f4f6;
+  }
+
+  button {
+    margin-top: 12px;
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  button:hover {
+    background: #1d4ed8;
+  }
+
+  button:active {
+    background: #1e40af;
+  }
+
+  #addRowBtn {
+    background: #10b981;
+    margin-right: 10px;
+  }
+
+  #addRowBtn:hover {
+    background: #059669;
+  }
+
+  #submitBtn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.05rem;
+    margin-top: 20px;
+  }
+
+  .remove-row {
+    color: #ef4444;
+    font-weight: bold;
+    font-size: 1.2em;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .remove-row:hover {
+    color: #dc2626;
+  }
+
+  .subtotal {
+    font-weight: 600;
+    text-align: right;
+    color: #1a3c5e;
+  }
+
+  h2 {
+    color: #1a3c5e;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  h3 {
+    color: #374151;
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #374151;
+  }
+
+  input[type="file"] {
+    display: block;
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px dashed #d1d5db;
+    border-radius: 6px;
+    background: #f9fafb;
+    cursor: pointer;
+  }
+
+  input[type="file"]:hover {
+    border-color: #9ca3af;
+  }
+</style>
+
+<h2>Register Inventory Inbound</h2>
+
+<a href="/home/inventory/" class="back-button">Back to Inventory</a>
+
+<form id="inboundForm" method="post" novalidate>
+  {% csrf_token %}
+
+  
+  <div class="form-row">
+    <label>Warehouse:</label>
+    <select name="warehouse" required>
+      <option value="">-- Select Warehouse --</option>
+      {% for warehouse in warehouses %}
+      <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label>Supplier:</label>
+    <input type="text" name="supplier" placeholder="Supplier name" required />
+  </div>
+
+  <div class="form-row">
+    <label>Reference Number:</label>
+    <input type="text" name="ref_num" placeholder="Inbound reference code, Ex: REF-101" required />
+  </div>
+
+  <div class="form-row">
+    <label>Inbound Date:</label>
+    <input type="date" name="inbound_date" required />
+  </div>
+
+  <div class="form-row" hidden>
+    <label>Total Price (RM):</label>
+    <input type="number" step="1" name="total_price" required />
+  </div>
+  
+  <h3>Products to Receive</h3>
+  
+  
+  <table id="productsTable" class="inbound-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Expiry Date</th>
+        <th>Unit Price</th>
+        <th>Subtotal</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- rows will be added here by JS -->
+    </tbody>
+  </table>
+  
+  <button type="button" id="addRowBtn">+ Add Product</button>
+  <br /><br />
+  
+  <div class="form-group">
+      <label>Or Upload Excel File</label>
+      <div style="border: 2px dashed #d1d5db; border-radius: 6px; padding: 16px; text-align: center; margin-top: 10px;">
+        <input
+          type="file"
+          name="excel_file"
+          accept=".xlsx"
+          id="excelFileInput"
+          style="display: none;"
+          onchange="handleFileUpload()"
+        />
+        <label for="excelFileInput" style="cursor: pointer; display: block;">
+          <div style="margin-bottom: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; color: #3b82f6;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <span style="color: #3b82f6; font-weight: 500;">Click to upload Excel file</span>
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+            Supported format: .xlsx
+          </div>
+        </label>
+      </div>
+      <div id="file-info" style="display: none; margin-top: 12px; padding: 8px; background: #f3f4f6; border-radius: 4px; font-size: 0.85rem;">
+        <span style="color: #111827; font-weight: 500;">Selected file:</span>
+        <span id="file-name" style="color: #3b82f6; margin-left: 6px;"></span>
+        <span id="file-size" style="color: #6b7280; margin-left: 6px;"></span>
+      </div>
+      <input type="hidden" name="is_excel_upload" value="false" id="isExcelUpload">
+  </div>
+
+  <button type="submit" id="submitBtn">Register Inbound</button>
+</form>
+
+<!-- Hidden template containing all product options (rendered by Django) -->
+<template id="product-select-template">
+  <select class="product-select" required>
+    <option value="">— Select product —</option>
+    {% for p in products_list %}
+    <option value="{{ p.id }}">
+      {{ p.name|escape }} • {{ p.sku|default:"-"|escape }}
+    </option>
+    {% empty %}
+    <option value="" disabled>No products available</option>
+    {% endfor %}
+  </select>
+</template>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const tableBody = document.querySelector("#productsTable tbody");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const form = document.getElementById("inboundForm");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // ── Add product row function (unchanged) ────────────────────────────────
+    function addProductRow() {
+      const row = document.createElement("tr");
+      row.className = "product-row";
+
+      const template = document.getElementById("product-select-template");
+      const selectClone = template.content
+        .cloneNode(true)
+        .querySelector("select");
+
+      row.innerHTML = `
+            <td></td>
+            <td><input type="number" class="qty-input" min="1" value="1" required></td>
+            <td><input type="date" class="expiry-input" required></td>
+            <td><input type="number" class="price-input" step="1" min="0" value="0"></td>
+            <td class="subtotal">0.00</td>
+            <td><button type="button" class="remove-row">×</button></td>
+        `;
+
+      row.cells[0].appendChild(selectClone);
+      row.dataset.productId = "";
+
+      selectClone.addEventListener("change", function () {
+        row.dataset.productId = this.value;
+      });
+
+      const updateSubtotal = () => {
+        const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
+        const price = parseFloat(row.querySelector(".price-input").value) || 0;
+        row.querySelector(".subtotal").textContent = (qty * price).toFixed(2);
+      };
+
+      row.querySelector(".qty-input").addEventListener("input", updateSubtotal);
+      row
+        .querySelector(".price-input")
+        .addEventListener("input", updateSubtotal);
+
+      row.querySelector(".remove-row").addEventListener("click", () => {
+        if (confirm("Remove this line?")) row.remove();
+      });
+
+      tableBody.appendChild(row);
+    }
+
+    addRowBtn.addEventListener("click", addProductRow);
+    addProductRow(); // start with one row
+
+    // Get the total price input field
+    const totalPriceInput = document.querySelector('input[name="total_price"]');
+
+    // Function to update the total price by summing all subtotals
+    function updateTotalPrice() {
+      let totalPrice = 0;
+      document.querySelectorAll(".product-row").forEach((row) => {
+        const subtotalText = row.querySelector(".subtotal").textContent;
+        const subtotal = parseFloat(subtotalText) || 0;
+        totalPrice += subtotal;
+      });
+      totalPriceInput.value = totalPrice.toFixed(2);
+    }
+
+    // Add event listeners to update total price when quantities or prices change
+    tableBody.addEventListener("input", function(e) {
+      if (e.target.classList.contains("qty-input") || e.target.classList.contains("price-input")) {
+        updateTotalPrice();
+      }
+    });
+
+    // Initialize total price
+    updateTotalPrice();
+
+  // Add event listener for Excel file upload
+    const excelFileInput = document.getElementById("excelFileInput");
+    const isExcelUpload = document.getElementById("isExcelUpload");
+
+    excelFileInput.addEventListener("change", function() {
+      if (this.files.length > 0) {
+        const file = this.files[0];
+        // Check if the uploaded file is an XLSX file
+        if (file.name.endsWith('.xlsx') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+          isExcelUpload.value = "true";
+          handleFileUpload();
+        } else {
+          isExcelUpload.value = "false";
+          alert("Please upload a valid XLSX file.");
+        }
+      }
+    });
+
+    // Function to handle file upload display
+    function handleFileUpload() {
+      const fileInfo = document.getElementById("file-info");
+      const fileName = document.getElementById("file-name");
+      const fileSize = document.getElementById("file-size");
+
+      if (excelFileInput.files.length > 0) {
+        const file = excelFileInput.files[0];
+        fileName.textContent = file.name;
+        fileSize.textContent = `(${formatFileSize(file.size)})`;
+        fileInfo.style.display = 'block';
+      } else {
+        fileInfo.style.display = 'none';
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      else return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    // ── Form submission ── now waits for backend response ─────────────────────
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing...";
+
+      const formData = new FormData(form);
+      const isExcelUploadValue = formData.get("is_excel_upload");
+
+      // Check if we're using XLSX upload or regular form submission
+      if (isExcelUploadValue === "true") {
+      // For XLSX upload, use FormData to include the file
+        const excelFormData = new FormData();
+        excelFormData.append("warehouse", formData.get("warehouse"));
+        excelFormData.append("inbound_date", formData.get("inbound_date"));
+        excelFormData.append("supplier", formData.get("supplier"));
+        excelFormData.append("ref_num", formData.get("ref_num"));
+        excelFormData.append("total_price", formData.get("total_price"));
+        excelFormData.append("is_excel_upload", "true");
+        excelFormData.append("excel_file", formData.get("excel_file"));
+
+        try {
+          const response = await fetch("{% url 'inventory-regInbound' %}", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            credentials: "same-origin",
+            body: excelFormData,
+          });
+          response_data = await response.json();
+          if (response.ok) {
+            alert(response_data.message);
+            window.location.href = "/home/inventory/";
+          } else {
+            alert(
+              response_data.error ||
+                "Failed to register inbound. Please try again."
+            );
+          }
+        } catch (err) {
+          console.error("Network error:", err);
+          alert("Connection error. Please check your internet and try again.");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Register Inbound";
+        }
+      } else {
+        // For regular form submission (no XLSX), use JSON as before
+        const payload = {
+          warehouse: formData.get("warehouse"),
+          inbound_date: formData.get("inbound_date"),
+          supplier: formData.get("supplier"),
+          ref_num: formData.get("ref_num"),
+          total_price: parseFloat(formData.get("total_price")) || 0,
+          is_using_xlsx: "false",
+          items: [],
+        };
+
+        document.querySelectorAll(".product-row").forEach((row) => {
+          const productId = row.dataset.productId;
+          const quantity = parseInt(row.querySelector(".qty-input").value) || 0;
+          const expiry = row.querySelector(".expiry-input").value;
+          const unitPrice =
+            parseFloat(row.querySelector(".price-input").value) || 0;
+
+          if (quantity > 0 && productId && expiry) {
+            payload.items.push({
+              product: productId,
+              quantity,
+              expiry_date: expiry,
+              unit_price: unitPrice,
+            });
+          }
+        });
+
+        if (payload.items.length === 0) {
+          alert("Please add at least one product with quantity > 0");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Register Inbound";
+          return;
+        }
+
+        try {
+          const response = await fetch("{% url 'inventory-regInbound' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}",
+            },
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+          });
+          response_data = await response.json();
+          if (response.ok) {
+            alert(response_data.message);
+            window.location.href = "/home/inventory/";
+          } else {
+            alert(
+              response_data.error ||
+                "Failed to register inbound. Please try again."
+            );
+          }
+        } catch (err) {
+          console.error("Network error:", err);
+          alert("Connection error. Please check your internet and try again.");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Register Inbound";
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Warehouse Management System{% endblock %}</title>
+    {% load static %}
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Add custom styles for role-based content -->
+    <style>
+      .admin-only, .manager-only, .operator-only {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-light text-dark font-sans">
+    <header class="bg-primary text-white py-4 shadow-md">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="logo flex items-center text-xl font-semibold">WarehouseMS</p>
+
+          <nav class="flex flex-wrap justify-center md:justify-end items-center gap-2">
+            <a href="{% url 'home' %}" class="nav-link px-3 py-2 rounded transition-all hover:bg-white/10 {% if request.resolver_match.url_name == 'home' %}bg-secondary{% endif %}">Home</a>
+            <a href="{% url 'products' %}" class="nav-link px-3 py-2 rounded transition-all hover:bg-white/10 {% if request.resolver_match.url_name == 'products' %}bg-secondary{% endif %}">Products</a>
+            <a href="{% url 'inventory' %}" class="nav-link px-3 py-2 rounded transition-all hover:bg-white/10 {% if request.resolver_match.url_name == 'inventory' %}bg-secondary{% endif %}">Inventory</a>
+            <a href="{% url 'insights' %}" class="nav-link px-3 py-2 rounded transition-all hover:bg-white/10 {% if request.resolver_match.url_name == 'insights' %}bg-secondary{% endif %}">Dashboards & Insights</a>
+
+            {% if user.is_authenticated %}
+            {% if user.role == 'admin' or user.role == 'manager' %}
+            <a href="{% url 'admin-control-panel' %}" class="nav-link px-3 py-2 rounded transition-all hover:bg-white/10 {% if request.resolver_match.url_name == 'admin-control-panel' %}bg-secondary{% endif %}">Admin Panel</a>
+            {% endif %}
+            <div class="user-info flex items-center gap-3 ml-4">
+              <span class="hidden sm:inline">{{ user.username }}</span>
+              <span class="user-role bg-secondary text-white px-2 py-1 rounded-full text-xs font-medium">{{ user.role }}</span>
+              <a href="{% url 'logout' %}" class="btn btn-secondary px-3 py-2 rounded border border-secondary text-secondary hover:bg-secondary hover:text-white transition-all">Logout</a>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary px-3 py-2 rounded bg-secondary text-white hover:bg-blue-700 transition-all">Login</a>
+            {% endif %}
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="py-8 min-h-[calc(100vh-120px)]">
+      <div class="container mx-auto px-4">
+        {% block content %}
+        <!-- Page content will be inserted here -->
+        {% endblock %}
+      </div>
+    </main>
+
+    <footer class="bg-primary text-white py-4 text-center mt-8">
+      <div class="container mx-auto px-4">
+        <p>&copy; 2026 Warehouse Management System. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Role-based JavaScript -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const userRole = "{{ user.role }}";
+
+        // Show role-specific content
+        if (userRole === "admin") {
+          document.querySelectorAll(".admin-only").forEach((el) => {
+            el.style.display = "block";
+          });
+        }
+
+        if (["admin", "manager"].includes(userRole)) {
+          document.querySelectorAll(".manager-only").forEach((el) => {
+            el.style.display = "block";
+          });
+        }
+
+        if (userRole === "operator") {
+          document.querySelectorAll(".operator-only").forEach((el) => {
+            el.style.display = "block";
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

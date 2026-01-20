@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Access Forbidden{% endblock %}
+
+{% block content %}
+<div class="forbidden-page">
+    <div class="forbidden-content">
+        <h1>403 - Access Forbidden</h1>
+        <p class="subtitle">You don't have permission to access this page</p>
+
+        <div class="forbidden-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+
+        <div class="forbidden-message">
+            <p>We're sorry, but you don't have the necessary permissions to view this page.</p>
+            <p>Please contact your administrator if you believe this is an error.</p>
+        </div>
+
+        <div class="forbidden-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary">Return to Home</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .forbidden-page {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        padding: 2rem 0;
+    }
+
+    .forbidden-content {
+        text-align: center;
+        max-width: 600px;
+        width: 100%;
+        padding: 2rem;
+    }
+
+    .forbidden-content h1 {
+        color: #dc3545;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .forbidden-content .subtitle {
+        color: var(--dark-color);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+    }
+
+    .forbidden-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 1.5rem;
+    }
+
+    .forbidden-message {
+        background: #f8d7da;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .forbidden-message p {
+        margin: 0;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    .forbidden-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 1px solid var(--secondary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    @media (max-width: 480px) {
+        .forbidden-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
