@@ -5,31 +5,47 @@ A production-grade, full-stack Warehouse Management System (WMS) built with Djan
 ## Features
 
 ### Core Features
-- **Inventory Management**: Add, update, archive, and delete products with fields: name, SKU, tags, description, category, quantity
+- **Inventory Management**: Add, update, and delete products with fields: name, SKU, description, category, quantity and warehouse
 - **Real-time Inventory Tracking**: Complete audit logs for all inventory changes
 - **Search & Filtering**: By keyword, tag, category, or SKU
 - **Low Stock Alerts**: Configurable thresholds with real-time notifications
-- **Bulk Operations**: CSV/XLSX import/export for inventory management
+- **Bulk Operations**: CSV/XLSX import/export for inventory management and adding products
 
 ### Inbound Management
-- **Incoming Stock Logging**: Product, supplier, quantity, invoice/reference document, received date
-- **Bulk Inbound Uploads**: Via CSV/XLSX files
-- **File Attachments**: Support for invoices, delivery orders, and other documents
+- **Incoming Stock Logging**: Product, supplier, quantity, invoice/reference, received date, total value and recieved products
+- **Bulk Inbound Uploads**: Via XLSX files
 - **Automatic Inventory Updates**: Real-time stock level adjustments
 - **Supplier Association**: Link inbound shipments to supplier records
 
 ### Outbound Management
-- **Outbound Transactions**: Product, quantity, customer, sales order reference, date
+- **Outbound Transactions**: Product, quantity, customer, reference, date and products
 - **Negative Stock Prevention**: System validation to prevent invalid dispatches
-- **Bulk Outbound Uploads**: Via CSV/XLSX files
-- **File Attachment Support**: For signed delivery orders and other documents
+- **Bulk Outbound Uploads**: Via XLSX files
 - **Real-time Inventory Deduction**: Immediate stock level updates
 
 ### User & Role Management
-- **Authentication & Authorization**: Session/JWT-based security
+- **Authentication & Authorization**: Django built-in Session based security
 - **Role-Based Access Control**: Admin, Manager, Operator roles
 - **Granular Permissions**: Read/write/delete permissions per module
 - **Activity Logging**: Comprehensive audit trail of user actions
+#### Permission matrix**
+  **Legend:**
+- **Full** = Full access
+- **❌** = No access
+
+| Feature / Function                                      | Admin | Manager | Operator |
+|--------------------------------------------------------|:-----:|:-------:|:--------:|
+| Authentication                                         | Login | Login   | Login    |
+| Dashboard Access                                       | Full  | Full    | Full     |
+| Product Management (add / edit / delete)               | Full  | Full   | ❌       |
+| Warehouse Management (add / edit / delete)             | Full  | Full   | ❌       |
+| Inventory Management (inbounds & outbounds)            | Full  | Full   | Full     |
+| Inventory Valuation                                    | Full  | Full   | ❌       |
+| Activity Reports                                       | Full  | Full   | ❌       |
+| Audit Dashboard                                        | Full  | Full   | ❌       |
+| Admin Control Panel                                    | Full  | Full   | ❌       |
+| User Management (accept / decline user requests)       | Full  | Full   | ❌       |
+
 
 ### Dashboard & Insights
 - **Key Statistics**: Total inventory items, inbound/outbound transactions, low stock alerts
@@ -40,6 +56,9 @@ A production-grade, full-stack Warehouse Management System (WMS) built with Djan
 - **Multi-Warehouse Support**: Per-warehouse quantity tracking and internal stock transfers
 - **Inventory Valuation**: Product cost tracking with total stock valuation reports
 - **Audit Dashboard**: Visual activity logs and frequent adjustment tracking
+
+### Extra Feature:
+- **Improved access security**: Only Admins/Managers can accept sign-in/registration requests, once accepted new users can use their sign-in details to login to the app 
 
 ## Project Structure
 
