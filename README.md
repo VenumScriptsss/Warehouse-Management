@@ -28,7 +28,7 @@ A production-grade, full-stack Warehouse Management System (WMS) built with Djan
 - **Role-Based Access Control**: Admin, Manager, Operator roles
 - **Granular Permissions**: Read/write/delete permissions per module
 - **Activity Logging**: Comprehensive audit trail of user actions
-#### Permission matrix**
+#### Permission matrix
   **Legend:**
 - **Full** = Full access
 - **❌** = No access
