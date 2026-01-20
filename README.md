@@ -38,7 +38,6 @@ A production-grade, full-stack Warehouse Management System (WMS) built with Djan
 
 ### Additional Features Implemented
 - **Multi-Warehouse Support**: Per-warehouse quantity tracking and internal stock transfers
-- **Cycle Count & Reconciliation**: Manual stock counting with discrepancy logging
 - **Inventory Valuation**: Product cost tracking with total stock valuation reports
 - **Audit Dashboard**: Visual activity logs and frequent adjustment tracking
 
